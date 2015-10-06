@@ -203,7 +203,34 @@ function getGridPos(i,j){
 	return pos;
 }
 
+function drawLine(xa,ya,xb,yb,color){
+	var myline = new createjs.Shape();
+	myline.graphics.setStrokeStyle(1);
+	myline.graphics.beginStroke(color);
+	myline.graphics.moveTo(xa, ya);
+	myline.graphics.lineTo(xb, yb);
+	myline.graphics.endStroke();
+	container.addChild(myline);
+}
+
 function drawBoard(){
+	
+	
+	palaceLineStart = getGridPos(4,1);
+	palaceLineEnd =	getGridPos(6,3);
+	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
+	palaceLineStart = getGridPos(6,1);
+	palaceLineEnd =	getGridPos(4,3);
+	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
+	
+	palaceLineStart = getGridPos(4,8);
+	palaceLineEnd =	getGridPos(6,10);
+	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
+	palaceLineStart = getGridPos(6,8);
+	palaceLineEnd =	getGridPos(4,10);
+	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
+	
+	
 	for (i = 0; i < 9; i++){
 		for (j = 0; j < 10; j++){
 			var extend = {x: 0, y:0};
@@ -216,14 +243,14 @@ function drawBoard(){
 			var y = pos.y;
 			
 			if (j == 0){
-				var text = new createjs.Text(i+1, "20px Arial", "#ff77ff");
+				var text = new createjs.Text(i+1, "20px Arial", "#5555bb");
 				text.x = pos.x - sScale / 4;
 				text.y  = pos.y - boardOffset.y / 4;
 				text.textBaseline = "alphabetic";
 				container.addChild(text);
 			}
 			if (i == 0){
-				var text = new createjs.Text(j+1, "20px Arial", "#ff77ff");
+				var text = new createjs.Text(j+1, "20px Arial", "#bb5555");
 				text.y = y;
 				text.x  = pos.x - boardOffset.x / 4;
 				text.textBaseline = "alphabetic";
@@ -295,7 +322,6 @@ function init(){
 	//var piece = new createjs.Sprite(piecesSheet, "horse");
 	//piece.x = piece.y = 40;
 	//container.addChild(piece);
-	
 	//drawPieces();
  	createPieces();	
 }
