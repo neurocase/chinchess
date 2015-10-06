@@ -1,0 +1,14 @@
+Chess, both Chinese and European seems to involve the idea of constantly moving ones army forward in order to take new ground, without jepeordising the
+safety of that unit. Units should either remain flanked by another unit, or be in a position where the enemy cannot take that unit next turn.
+
+
+1 - Process the possible moves of all pieces
+2 - Eliminate any moves that would cause this piece to be taken.
+(Excpt: In cases of baiting an enemy, or if it is unlikely that the play would occur because the enemy may make a greater piece more vulnerable)
+
+
+
+AI: Create a stack by selecting the least desired moves until the top of the stack contains the most desired move and use that.
+
+
+Thinking moves ahead? AI needs to calculate the moves a player may take
