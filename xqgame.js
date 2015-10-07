@@ -1,3 +1,6 @@
+//DEBUG
+var debugCoords = true;
+
 var inited = false;
 var mousePos = {x: 0, y: 0};
 var update;
@@ -8,8 +11,6 @@ var sScale = (sceneSize / 20);
 var canvas = document.getElementById("gameCanvas");
 var stage = new createjs.Stage(canvas);
 
-
-
 var piecesData = {
 	images: ["images/xiangqi-pieces-sprites-small.png"],
 	frames: {width:50, height:50,count:14, regX: 25, regY:25, spacing:0, margin:0},
@@ -18,7 +19,7 @@ var piecesData = {
 		red_advisor:1, 
 		red_horse:2, 
 		red_elephant:3, 
-		red_rook:4, 
+		red_chariot:4, 
 		red_cannon:5, 
 		red_soldier:6,
 		
@@ -26,23 +27,75 @@ var piecesData = {
 		black_advisor:8, 
 		black_horse:9, 
 		black_elephant:10,
-		black_rook:11,
+		black_chariot:11,
 		black_cannon:12, 
 		black_soldier:13
 	}
 };
-
 var piecesSheet = new createjs.SpriteSheet(piecesData);
+
+
+function createPieces(){
+	var boardPosition = {x:0, y:0};
+	var wtg = {x:0,y:0};
+	// wtg = World To Grid
+	for (var i = 0; i < 32; i++){
+	var pieceType = "soldier";
+	// pieceType has a safe default value
+	if (i < 16){
+		pieceType = "red_" + getPieceName(i);
+	}else{
+		pieceType = "black_" + getPieceName(i - 16);
+	}
+	var piece = new createjs.Sprite(piecesSheet, pieceType);
+	container.addChild(piece);
+	if (i < 16){
+	piece.name = (pieceType);
+	}else{
+	piece.name = (pieceType);	
+	}
+	piece.on("pressmove", function (evt) {
+		mousePos = {x: evt.stageX, y: evt.stageY};
+		this.x = mousePos.x;
+		this.y = mousePos.y;
+		wtg = getWorldSpaceToNearestGrid(this.x,this.y);
+	   // console.log("Press Move");
+		// indicate that the stage should be updated on the next tick:
+		update = true;
+	});
+	piece.on("rollover", function (evt) {
+		this.scale =  1.2;
+	 //   update = true;
+	});
+	piece.on("pressup", function(evt) { 
+		console.log("up"); 
+		var gtw = gridToScreenPos(wtg.x,wtg.y);
+		this.x = gtw.x;
+		this.y = gtw.y;
+	});	
+	piece.on("pressdown", function(evt){
+		boardPosition = getWorldSpaceToNearestGrid(this.x,this.y);
+		//boardPosition.y = getWorldSpaceToNearestGrid();
+	});
+	piece.on("rollout", function (evt) {
+		 this.scaleX = piece.scaleY =  1;
+		update = true;
+	});
+		var startPos = getStartingPosition(pieceType);
+		startPos = gridToScreenPos(startPos.x, startPos.y);
+		//console.log(startPos);
+			piece.x = startPos.x;
+			piece.y = startPos.y;
+	}
+}
+
+
 var container = new createjs.Container();
-
-
-// 1 General, 2 Advisors, 2 Horses, 2 Cannons, 2 Rooks, 5 Soldiers
-
 function getPieceName(n){
 	if (n < 5){
 		return "soldier";	
 	}else if( n < 7){
-		return "rook";	
+		return "chariot";	
 	}else if(n < 9){
 		return "cannon";
 	}else if(n < 11){
@@ -57,19 +110,11 @@ function getPieceName(n){
 		console.log("error: incorrect ID for pieceType");	
 	}
 }
-//4,7: 1,3,5,7,9 -> Soldier
-//3,8: 2,8 Cannon
-//1,10
-//1,9 ->Rook
-//2,8 horse
-//eleph 3,7
-// 5 gen
-// 4,6 advisor
 
 var red_count ={
 		soldier: 0,
 		cannon: 0,
-		rook: 0,
+		chariot: 0,
 		horse: 0,
 		elephant: 0,
 		advisor: 0,
@@ -78,13 +123,58 @@ var red_count ={
 var black_count ={
 		soldier: 0,
 		cannon: 0,
-		rook: 0,
+		chariot: 0,
 		horse: 0,
 		elephant: 0,
 		advisor: 0,
 		general: 0
 }
 
+function isValidMove(piece,lastx,lasty, x,y){
+	
+	
+	var lgrid = {x:0, y:0};
+	lgrid = getWorldSpaceToNearestGrid(lastx,lasty);
+	
+	if(debugCoords){
+		console.log("isValidMove:" + piece.name + " x:" + lastx + " y:" + lasty + " x:" + x + " y:" + y); 
+		console.log("isValid: n:" + piece.name + " x:" + lgrid.x + " y:" + lgrid.y); 
+	}
+	
+	var name = piece.name.split("_");
+	switch(name[1]){
+		case "soldier":
+		if(Math.abs(lgrid.y - y) == 1){
+			return true;	
+		}else{
+			console.log("false: " + Math.abs(piece.y - y));
+		return false;
+		}
+		break;
+		case "cannon":
+	
+			break;
+		case "chariot":
+		
+			break;
+		case "horse":
+			
+			break;
+		case "elephant":
+			
+			break;
+		case "advisor":
+		
+			break;
+		case "general":
+	
+			break;
+			
+			
+			
+	}
+	return false;
+}
 function getLinePosition(name, count){
 	var retVal = 0;
 	switch(name){
@@ -96,9 +186,9 @@ function getLinePosition(name, count){
 			retVal = count.cannon * 6 + 2;
 			count.cannon++;
 			break;
-		case "rook":
-			retVal = count.rook * 8 + 1;
-			count.rook++;
+		case "chariot":
+			retVal = count.chariot * 8 + 1;
+			count.chariot++;
 			break;
 		case "horse":
 			retVal = count.horse * 6 + 2;
@@ -119,8 +209,6 @@ function getLinePosition(name, count){
 	}
 	return retVal;
 }
-
-
 function getStartingPosition(pieceName){
 	var name = pieceName.split("_");
 	var pos = {x:1,y:1};
@@ -145,52 +233,31 @@ function getStartingPosition(pieceName){
 	
 	return pos;
 }
+function getWorldSpaceToNearestGrid(x,y){
+	var retVal = {x:0,y:0};
+	retVal.x = ((x - boardOffset.x) / (sceneSize / 11)) + 1; 
 
-function createPieces(){
-	for (var i = 0; i < 32; i++){
-	var pieceType = "soldier";
-	// pieceType has a safe default value
-	if (i < 16){
-		pieceType = "red_" + getPieceName(i);
+	if (((y - boardOffset.y) / (sceneSize / 11)) < 4.5){
+		retVal.y = ((y - boardOffset.y) / (sceneSize / 11)) + 1;
 	}else{
-		pieceType = "black_" + getPieceName(i - 16);
-	}
+		retVal.y = (((y - sScale) - boardOffset.y) / (sceneSize / 11)) + 1;
+	}	
 	
-	var piece = new createjs.Sprite(piecesSheet, pieceType);
-	container.addChild(piece);
-	if (i < 16){
-	piece.name = (pieceType);
-	}else{
-	piece.name = (pieceType);	
+	retVal.x = Math.round(retVal.x);
+	retVal.y = Math.round(retVal.y);
+	//pos.x = boardOffset.x + i * (sceneSize / 11);
+	//pos.y = boardOffset.y + j * (sceneSize / 11);
+	if (debugCoords) {
+		console.log("WorldToGrid x:" + x + " y:" + y + " = x:" + retVal.x + " y:" + retVal.y);
 	}
-	piece.on("pressmove", function (evt) {
-		mousePos = {x: evt.stageX, y: evt.stageY};
-		this.x = mousePos.x;
-		this.y = mousePos.y;
-	   // console.log("Press Move");
-		// indicate that the stage should be updated on the next tick:
-		update = true;
-	});
-	piece.on("rollover", function (evt) {
-		this.scale =  1.2;
-	 //   update = true;
-	});
-	piece.on("rollout", function (evt) {
-		 this.scaleX = piece.scaleY =  1;
-		update = true;
-	});
-		var startPos = getStartingPosition(pieceType);
-		startPos = getGridPos(startPos.x, startPos.y);
-		console.log(startPos);
-			piece.x = startPos.x;
-			piece.y = startPos.y;
-	}
+	return retVal;
 }
+
 
 circle = new createjs.Shape();
 var g = new createjs.Graphics();
 
-function getGridPos(i,j){
+function gridToScreenPos(i,j){
 	i--;
 	j--;
 	var pos = {x:0,y:0};
@@ -200,9 +267,11 @@ function getGridPos(i,j){
 	if (j > 4){
 		pos.y = pos.y + sScale;	
 	}
+	if (debugCoords){
+	console.log("Grid To World: x:" + pos.x + " y:" + pos.y);
+	}
 	return pos;
 }
-
 function drawLine(xa,ya,xb,yb,color){
 	var myline = new createjs.Shape();
 	myline.graphics.setStrokeStyle(1);
@@ -212,22 +281,21 @@ function drawLine(xa,ya,xb,yb,color){
 	myline.graphics.endStroke();
 	container.addChild(myline);
 }
-
 function drawBoard(){
 	
 	
-	palaceLineStart = getGridPos(4,1);
-	palaceLineEnd =	getGridPos(6,3);
+	palaceLineStart = gridToScreenPos(4,1);
+	palaceLineEnd =	gridToScreenPos(6,3);
 	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
-	palaceLineStart = getGridPos(6,1);
-	palaceLineEnd =	getGridPos(4,3);
+	palaceLineStart = gridToScreenPos(6,1);
+	palaceLineEnd =	gridToScreenPos(4,3);
 	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
 	
-	palaceLineStart = getGridPos(4,8);
-	palaceLineEnd =	getGridPos(6,10);
+	palaceLineStart = gridToScreenPos(4,8);
+	palaceLineEnd =	gridToScreenPos(6,10);
 	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
-	palaceLineStart = getGridPos(6,8);
-	palaceLineEnd =	getGridPos(4,10);
+	palaceLineStart = gridToScreenPos(6,8);
+	palaceLineEnd =	gridToScreenPos(4,10);
 	drawLine(palaceLineStart.x,palaceLineStart.y,palaceLineEnd.x,palaceLineEnd.y,"red");
 	
 	
@@ -237,7 +305,7 @@ function drawBoard(){
 			// extend: draw lines positive and negative from grid position: 0 = do both, 1 = positive only, -1 = negative only
 			var pos = {x: 0, y:0};
 			
-			pos = getGridPos(i+1,j+1);
+			pos = gridToScreenPos(i+1,j+1);
 			
 			var x = pos.x;
 			var y = pos.y;
@@ -310,7 +378,6 @@ function drawBoard(){
 		}
 	}
 }
-
 function init(){
 	stage.addChild(container);
     inited = true;
@@ -325,7 +392,6 @@ function init(){
 	//drawPieces();
  	createPieces();	
 }
-
 function tick(event) {
 	update = false;
 	stage.update(event);
