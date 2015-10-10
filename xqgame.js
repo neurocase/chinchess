@@ -10,6 +10,8 @@ var sScale = (sceneSize / 20);
 
 var canvas = document.getElementById("gameCanvas");
 var stage = new createjs.Stage(canvas);
+var container = new createjs.Container();
+
 
 var piecesData = {
 	images: ["images/xiangqi-pieces-sprites-small.png"],
@@ -90,7 +92,7 @@ function createPieces(){
 }
 
 
-var container = new createjs.Container();
+
 function getPieceName(n){
 	if (n < 5){
 		return "soldier";	
